@@ -1,0 +1,17 @@
+# Python
+__pycache__
+*.pyc
+
+# Mac related
+.DS_Store
+
+# J Notebook
+.ipynb_checkpoints/
+
+# Data
+data/**
+#!data/pre_trained.zip
+
+# Model checkpoints or .h5
+*.h5
+checkpoints/
