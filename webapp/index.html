@@ -1,12 +1,27 @@
 <!doctype html>
 <html>
+
     <head>
         <meta charset="utf-8">
-        <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" type="text/css" href="assets/dropzone/basic.min.css">
+        <link rel="stylesheet" type="text/css" href="assets/dropzone/dropzone.min.css">
     </head>
+
     <body>
         <h1>WiP</h1>
+
+        <!-- Dropzone -->
+        <form action="/file-upload" class="dropzone" id="image-to-process">
+            <input type="file" name="file" />
+        </form>
+        
+        <button id="send-multipart-request">Send</button>
+
     </body>
+
+    <script type="text/javascript" src="assets/dropzone/dropzone.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
+
 </html>
