@@ -57,11 +57,12 @@
     	    image.src = croppedCan.toDataURL();
     	  
     	    // Put the image where you need to.
-    	    document.getElementsByTagName('body')[0].appendChild(image);
+    	    $("#selection-and-prediction").html("<h3>Selection</h3><br>").append(image);
     	   	
     	   	pixels = croppedCanCtx.getImageData(0, 0, glass.offsetWidth, glass.offsetHeight).data;
     	   	reducedPixels = [];
 
+    	   	// RGBa to Gray scale
         	for (var i = 0; i < pixels.length; i += 4) {
         		red = pixels[i];
         		green = pixels[i + 1];
@@ -72,7 +73,9 @@
         		reducedPixels.push(gray);
         	}
 
+        	// TODO: prediction
         	console.log("reducedPixels", reducedPixels);
+        	$("#selection-and-prediction").append("<h3>Prediction</h3><br>" + reducedPixels);
 
         	return {
         		reducedPixels: reducedPixels,

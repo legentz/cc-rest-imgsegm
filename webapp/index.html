@@ -14,19 +14,22 @@
         <h1>WiP</h1>
 
         <!-- Dropzone -->
-        <form action="/file-upload" class="dropzone" id="image-to-process">
-            <input type="file" name="file" />
+        <form action="/upload" method="POST" class="dropzone" id="my-dropzone">
+            <div class="fallback">
+                <input name="file" type="file" multiple />
+                <input type="submit" value="Upload" />
+            </div>
         </form>
-        
-        <button id="send-multipart-request">Send</button>
 
         <hr>
 
         <!-- Magnifier -->
         <div class="img-magnifier-container"></div>
+        <div id="selection-and-prediction"></div>
 
     </body>
 
+    <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="assets/dropzone/dropzone.min.js"></script>
     <script type="text/javascript" src="assets/magnifier/magnifier.js"></script>
     <script type="text/javascript" src="main.js"></script>
