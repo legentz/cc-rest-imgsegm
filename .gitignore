@@ -6,7 +6,6 @@ __pycache__
 .DS_Store
 
 # J Notebook
-.ipynb
 .ipynb_checkpoints/
 
 # tmp
