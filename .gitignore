@@ -5,13 +5,7 @@ __pycache__
 # Mac related
 .DS_Store
 
-# J Notebook
-.ipynb_checkpoints/
+# Server
+tmp/**
+!tmp/.gitkeep
 
-# Data
-data/**
-#!data/pre_trained.zip
-
-# Model checkpoints or .h5
-*.h5
-checkpoints/
