@@ -5,7 +5,20 @@ __pycache__
 # Mac related
 .DS_Store
 
-# Server
-tmp/**
-!tmp/.gitkeep
+# J Notebook
+.ipynb
+.ipynb_checkpoints/
 
+# tmp
+server/tmp/**
+!server/tmp/.gitkeep
+
+# model
+server/model/data/**
+!server/model/data/.gitkeep
+server/model/weights/**
+!server/model/weights/.gitkeep
+
+# Model checkpoints or .h5
+*.h5
+checkpoints/
