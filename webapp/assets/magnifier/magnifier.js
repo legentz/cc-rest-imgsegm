@@ -177,6 +177,6 @@
     }
 
     // Init
-    magnify("assets/temp_image.png", 500, 500);
+    magnify("assets/0-5_1536x1024.png", 1536, 1024);
 
 })();
