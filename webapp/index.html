@@ -5,35 +5,50 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="stylesheet" type="text/css" href="assets/dropzone/basic.min.css">
-        <link rel="stylesheet" type="text/css" href="assets/dropzone/dropzone.min.css">
-        <link rel="stylesheet" type="text/css" href="assets/magnifier/magnifier.css">
+        <style>
+        nav, ol, ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        li {
+            padding: 10px 0;
+        }
+
+        .container { 
+          height: 400px;
+          position: relative;
+        }
+
+        .center {
+          margin: 0;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+        }
+        </style>
     </head>
 
     <body>
-        <h1>WiP</h1>
+        <h1>EM Segmentation App</h1>
 
-        <!-- Dropzone -->
-        <!-- <form action="0.0.0.0:5000/from_img" id="my-dropzone" enctype="multipart/form-data">
-            <input name="file" type="file" multiple />
-            <input type="submit" value="Predict!" />
-        </form> action="0.0.0.0:5000/from_img" -->
-
-        <button id="submit-all" disabled>Predict!</button>
-        <button id="clear-dropzone">Reset</button>
-        <form class="dropzone" id="my-dropzone" enctype="multipart/form-data"></form>
-
-        <hr>
-
-        <!-- Magnifier -->
-        <div class="img-magnifier-container"></div>
-        <div id="selection-and-prediction"></div>
+        <div class="container">
+            <div class="center"> 
+                <img src="./assets/home.png">
+                <nav>
+                    <ul>
+                        <li><a href="from_images.html">Upload and predict</a></li>
+                        <li><a href="from_selection.html">Predict from portion (of a bigger image)</a></li>
+                        <li><a href="credits.html">Credits</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
 
     </body>
 
     <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="assets/dropzone/dropzone.min.js"></script>
-    <script type="text/javascript" src="assets/magnifier/magnifier.js"></script>
-    <script type="text/javascript" src="main.js"></script>
-
 </html>
