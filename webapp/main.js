@@ -1,46 +1,50 @@
-(() => {
-	var endpoint = "http://0.0.0.0:5000"
+var endpoint = "http://0.0.0.0:5000"
+var pageReady = "DOMContentLoaded";
 
-	var pageReady = "DOMContentLoaded";
-	// var imageDropzone = $("#image-to-process");
-	// var sendImageBtn = $("#send-multipart-request");
+Dropzone.options.myDropzone = {
 
-	// Dropzone init
-	$(document).ready((e) => {
-		var formDropzone = $("div#form-dropzone").dropzone({
-			url: endpoint + "/predict-from-img",
-			method: "post",
-			paramName: "imgs",
-			maxFiles: 3
+	// Prevents Dropzone from uploading dropped files immediately
+	autoProcessQueue: false,
+	url: endpoint + "/from_img",
+	method: "post",
+	maxFiles: 3,
+
+	init: function() {
+		var submitButton = document.querySelector("#submit-all")
+		myDropzone = this; // closure
+
+		submitButton.addEventListener("click", function() {
+			myDropzone.processQueue(); // Tell Dropzone to process all queued files.
 		});
-	});
 
-	/**
-		Events
-	*/
+		// You might want to show the submit button only when 
+		// files are dropped here:
+		this.on("addedfile", function() {
+			// Show submit button here and/or inform user to click it.
+			submitButton.disabled = false;
+		});
 
-	// pageReady
-	$(document).ready((e) => {
-		console.log(pageReady);
-	});
+		this.on("sending", function(file) {
+			alert('Sending the file' +  file.name);
+		});
 
-	/**
-		Actions
-	*/
+		document
+			.querySelector("button#clear-dropzone")
+			.addEventListener("click", function() {
+			// Using "myDropzone" here, because "this" doesn't point to the dropzone anymore
+			myDropzone.removeAllFiles();
+		});
 
-	// Send image to process
-	// sendImageBtn.onClick((e) => {	
-	// 	console.log("Clicked on sendImageBtn");
+	}
+};
 
-	// 	$.ajax({
- //        url: endpoint + '/upload',
- //        dataType: 'json',
- //        data: imageDropzone.data(),                         
- //        type: 'post',
- //        success: function(php_script_response){
- //            alert(php_script_response); // display response from the PHP script, if any
- //        }
- //     });
-	// });
 
-})();
+
+/**
+	Events
+*/
+
+// pageReady
+$(document).ready((e) => {
+	console.log(pageReady);
+});

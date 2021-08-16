@@ -14,12 +14,14 @@
         <h1>WiP</h1>
 
         <!-- Dropzone -->
-        <form action="/upload" method="POST" class="dropzone" id="my-dropzone">
-            <div class="fallback">
-                <input name="file" type="file" multiple />
-                <input type="submit" value="Upload" />
-            </div>
-        </form>
+        <!-- <form action="0.0.0.0:5000/from_img" id="my-dropzone" enctype="multipart/form-data">
+            <input name="file" type="file" multiple />
+            <input type="submit" value="Predict!" />
+        </form> action="0.0.0.0:5000/from_img" -->
+
+        <button id="submit-all" disabled>Predict!</button>
+        <button id="clear-dropzone">Reset</button>
+        <form class="dropzone" id="my-dropzone" enctype="multipart/form-data"></form>
 
         <hr>
 
