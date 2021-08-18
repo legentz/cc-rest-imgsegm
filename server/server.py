@@ -33,6 +33,8 @@ unet.load_weights('./model/weights/pre_trained.h5')
 # Flask
 #
 app = Flask(__name__)
+
+# NOTE: We may not use this in production
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -41,7 +43,10 @@ ALLOWED_EXTENSIONS = set(['tiff', 'tif', 'jpg', 'jpeg', 'png'])
 UPLOAD_FOLDER = './tmp'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# utils
+# 
+# Helpers functions
+# 
+
 # pack the response into a JSON to be delivered within the response
 def _pack_response(data = None):
 	if not data:
@@ -55,6 +60,7 @@ def _allowed_file(filename):
 	return '.' in filename and \
 		   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# iterate through a generator over the images in the directory and predict
 def _read_from_tmp_and_predict(dir_to_read, f_name2path = None):
 
 	# load images from the tmp folder
@@ -67,7 +73,7 @@ def _read_from_tmp_and_predict(dir_to_read, f_name2path = None):
 
 	return preds
 
-# create a new sub-folder to handle each upload/prediction
+# create a new sub-folder (under tmp) to store each upload/prediction
 def _create_tmp_subfolder():
 	mydir = os.path.join(
 		os.getcwd(),
@@ -75,19 +81,29 @@ def _create_tmp_subfolder():
 		datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 	
 	try:
-		os.makedirs(mydir)
-		os.makedirs(os.path.join(mydir, 'preds'))
+		os.makedirs(mydir)								# this folder have timestamp
+		os.makedirs(os.path.join(mydir, 'preds')) 		# this folder will host predictions related to a single upload session
 	except OSError as e:
 		if e.errno != errno.EEXIST:
 			raise  # This was not a "directory exist" error..
 
 	return mydir
 
-# routes		
-@app.route('/preds/<name>')
-def download_file(path, name):
-	return send_from_directory(path, name)
+# 
+# Flask routes
+#
 
+# statically serve files
+# NOTE: this is not suggested in production for a matter of security
+# NOTE: disable directory listing
+# @app.route('/preds/<name>')
+# def download_file(path, name):
+# 	return send_from_directory(path, name)
+
+# upload one ore more images (locally), using uuid for file names,
+# predict and serve results
+# NOTE: replace local upload with Amazon S3 to store and serve images 
+# https://www.zabana.me/notes/flask-tutorial-upload-files-amazon-s3
 @app.route('/from_img', methods = ['POST'])
 @cross_origin()
 def predict_from_img():
@@ -103,36 +119,42 @@ def predict_from_img():
 	f_name2path = {}
 	print('Creating temp sub-folder', sub_tmp_dir)
 
-	# iterate over files
+	# iterate over each file
 	for f_name in request.files:
 		f = request.files[f_name]
 
-		# check if it's allowed
+		# check if it has an allowed extension
 		if f and _allowed_file(f.filename):
 
-			# replacing the name with an UUID
+			# replacing the name with an UUID to avoid dealing with strange names...
 			uuid_name = str(uuid.uuid4()) + '.' + f.filename.rsplit('.')[-1]
 			f_path = os.path.join(sub_tmp_dir, uuid_name)
 
-			# save in a dict to be used when predicting
+			# save in a dict (mapping) to be used when predicting
 			f_name2path[uuid_name] = f_path
 
 			f.save(f_path)
-			print('Upload complete... Prediction time')
+	
+	print('Upload complete... Prediction time')
 
-	# TODO: directory listing with all updates and purge button
-	#preds = {'prediction': url_for('download_file', name=filename)}
-
-	# iterate over sub_tep_dir (restore sorting)
+	# iterate over the subfolder within tmp 
 	preds = _read_from_tmp_and_predict(sub_tmp_dir)
 	print('Predictions (no.', len(preds), ') with shape', preds.shape)
 
-	print('Saving predictions as images')
 	saved_imgs = Images.save_as_imgs(os.path.join(sub_tmp_dir, "preds"), preds, list(f_name2path.keys()))
+	print('Saved predictions as images')
 
 	print('saved', saved_imgs)
 
 	return _pack_response(saved_imgs)
+
+# prediction from the JS magnifier 
+# NOTE: need to deal with 512x512 images
+# https://www.geeksforgeeks.org/python-pil-image-resize-method/
+@app.route('/from_selection', methods = ['POST'])
+@cross_origin()
+def predict_from_selection():
+	pass
 
 #
 # Main
