@@ -2,6 +2,7 @@
 import os, re
 import numpy as np 
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from sys import exc_info
 from math import ceil
 from PIL import Image
@@ -20,11 +21,9 @@ class Iterator(object):
 	def imgs_from_folder(directory=None, normalize=False, output_shape=None):
 		assert os.path.exists(directory)
 
-		# we need to sort to be sure the order is maintained
-		# our files are always 0.png, 1.png, ...
-		# TODO: handle labels instead of sorting
-		list_dir = os.listdir(directory)
-		list_dir.sort(key=lambda f: int(re.sub('\D', '', f)))
+		# # we need to sort to be sure the order is maintained
+		list_dir = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+		list_dir.sort()
 
 		# loop over images in dir
 		for img in list_dir:
@@ -102,7 +101,7 @@ class Images(object):
 
 		# we need to sort to be sure the order is maintained
 		# our files are always 0.png, 1.png, ...
-		# TODO: handle labels instead of sorting
+		#TODO: handle labels instead of sorting
 		imgs = os.listdir(path)
 		imgs.sort(key=lambda f: int(re.sub('\D', '', f)))
 		n_imgs = len(imgs) 
@@ -136,8 +135,24 @@ class Images(object):
 		plt.show()
 
 	@staticmethod
-	def save_as_imgs(arr, save_as='.png'):
-		raise('Sorry, not implemented.')
+	def save_as_imgs(output_dir, preds, f_names):
+		assert output_dir is not None
+		assert len(f_names) == preds.shape[0]
+
+		saved_imgs = []
+		
+		# for each prediction of the shape(1, x, x, 1)
+		for i in range(preds.shape[0]):
+			arr, f_name = preds[i], f_names[i]
+
+			# reshape and save
+			im = Image.fromarray(np.uint8(cm.gist_earth(arr.reshape(preds.shape[1], preds.shape[2])) * 255))
+			im_path = os.path.join(output_dir, f_name)
+			im.save(im_path)
+
+			saved_imgs.append(im_path)
+
+		return saved_imgs
 
 
 

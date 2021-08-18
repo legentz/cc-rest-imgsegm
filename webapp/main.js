@@ -7,6 +7,7 @@ Dropzone.options.myDropzone = {
 	autoProcessQueue: false,
 	url: endpoint + "/from_img",
 	method: "post",
+	uploadMultiple: true,
 	maxFiles: 3,
 
 	init: function() {
@@ -23,9 +24,11 @@ Dropzone.options.myDropzone = {
 			// Show submit button here and/or inform user to click it.
 			submitButton.disabled = false;
 		});
+		// TODO: check for "zero" files to upload to deactivate the "predict" button again...
 
 		this.on("sending", function(file) {
-			alert('Sending the file' +  file.name);
+			// alert('Sending the file' +  file.name);
+			// TODO
 		});
 
 		document
