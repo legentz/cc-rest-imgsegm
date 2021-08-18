@@ -135,11 +135,12 @@ class Images(object):
 		plt.show()
 
 	@staticmethod
-	def save_as_imgs(output_dir, preds, f_names):
+	def save_as_imgs(output_dir, preds, f_name2path):
 		assert output_dir is not None
-		assert len(f_names) == preds.shape[0]
+		assert len(f_name2path.keys()) == preds.shape[0]
 
-		saved_imgs = []
+		# saved_imgs = []
+		f_names = list(f_name2path.keys())
 		
 		# for each prediction of the shape(1, x, x, 1)
 		for i in range(preds.shape[0]):
@@ -150,9 +151,9 @@ class Images(object):
 			im_path = os.path.join(output_dir, f_name)
 			im.save(im_path)
 
-			saved_imgs.append(im_path)
+			f_name2path[f_name]['output'] = im_path
 
-		return saved_imgs
+		return f_name2path
 
 
 

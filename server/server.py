@@ -32,27 +32,48 @@ unet.load_weights('./model/weights/pre_trained.h5')
 # 
 # Flask
 #
-app = Flask(__name__)
+app = Flask(__name__, static_folder='tmp')
 
 # NOTE: We may not use this in production
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # upload config
-ALLOWED_EXTENSIONS = set(['tiff', 'tif', 'jpg', 'jpeg', 'png'])
-UPLOAD_FOLDER = './tmp'
+PROTOCOL = "http"
+HOST = "0.0.0.0"
+PORT = "5000"
+BASE_URL = PROTOCOL + "://" + HOST + ":" + PORT
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
+UPLOAD_FOLDER = 'tmp'
+EXPOSE_URLS_AS_ABSOLUTE = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # 
 # Helpers functions
 # 
 
+def _check_urls(data = None):
+	if not data:
+		data = {}
+
+	for img_name, urls in data.items():
+		if EXPOSE_URLS_AS_ABSOLUTE:
+			data[img_name]['input'] = "file:///" + data[img_name]['input']
+			data[img_name]['output'] = "file:///" + data[img_name]['output']
+		else:
+			data[img_name]['input'] = BASE_URL + "/" + UPLOAD_FOLDER + "/" + (data[img_name]['input'].split(UPLOAD_FOLDER)[1])
+			data[img_name]['output'] = BASE_URL + "/" + UPLOAD_FOLDER + "/" + (data[img_name]['output'].split(UPLOAD_FOLDER)[1])
+	
+	return data
+
 # pack the response into a JSON to be delivered within the response
 def _pack_response(data = None):
 	if not data:
 		data = {}
 
-	response = jsonify(data)
+	_data = _check_urls(data)
+
+	response = jsonify(_data)
 	return response
 
 # check if files extensions are allowed
@@ -131,7 +152,7 @@ def predict_from_img():
 			f_path = os.path.join(sub_tmp_dir, uuid_name)
 
 			# save in a dict (mapping) to be used when predicting
-			f_name2path[uuid_name] = f_path
+			f_name2path[uuid_name] = {'input': f_path, 'output': ''}
 
 			f.save(f_path)
 	
@@ -141,10 +162,8 @@ def predict_from_img():
 	preds = _read_from_tmp_and_predict(sub_tmp_dir)
 	print('Predictions (no.', len(preds), ') with shape', preds.shape)
 
-	saved_imgs = Images.save_as_imgs(os.path.join(sub_tmp_dir, "preds"), preds, list(f_name2path.keys()))
-	print('Saved predictions as images')
-
-	print('saved', saved_imgs)
+	saved_imgs = Images.save_as_imgs(os.path.join(sub_tmp_dir, "preds"), preds, f_name2path)
+	print('Saved predictions as images', saved_imgs)
 
 	return _pack_response(saved_imgs)
 
@@ -160,4 +179,5 @@ def predict_from_selection():
 # Main
 #
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(debug=True, port=PORT, host=HOST)
+

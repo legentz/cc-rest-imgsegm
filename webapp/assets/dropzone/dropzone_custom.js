@@ -26,9 +26,25 @@ Dropzone.options.myDropzone = {
 		});
 		// TODO: check for "zero" files to upload to deactivate the "predict" button again...
 
-		this.on("sending", function(file) {
-			// alert('Sending the file' +  file.name);
-			// TODO
+		this.on("reset", function() {
+			submitButton.disabled = true;
+		});
+
+		this.on("successmultiple", function(obj, response) {
+			var input = document
+				.querySelector("div#input-img");
+			var output = document
+				.querySelector("div#output-img");
+
+			for (var img_name in response) {
+				inputImg = document.createElement('img');
+				outputImg = document.createElement('img');
+				inputImg.src = response[img_name]['input']
+				outputImg.src = response[img_name]['output']
+
+				input.appendChild(inputImg);
+				output.appendChild(outputImg);
+			}
 		});
 
 		document
@@ -40,14 +56,3 @@ Dropzone.options.myDropzone = {
 
 	}
 };
-
-
-
-/**
-	Events
-*/
-
-// pageReady
-$(document).ready((e) => {
-	console.log(pageReady);
-});

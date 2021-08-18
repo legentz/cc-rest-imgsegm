@@ -7,6 +7,27 @@
 
         <link rel="stylesheet" type="text/css" href="assets/dropzone/basic.min.css">
         <link rel="stylesheet" type="text/css" href="assets/dropzone/dropzone.min.css">
+
+        <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        /* Create two equal columns that floats next to each other */
+        .column {
+          float: left;
+          width: 50%;
+          padding: 10px;
+          height: 300px; /* Should be removed. Only for demonstration */
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+        </style>
     </head>
 
     <body>
@@ -17,10 +38,23 @@
         <button id="clear-dropzone">Reset</button>
         <form class="dropzone" id="my-dropzone" enctype="multipart/form-data"></form>
 
+        <br>
+
+        <div class="row">
+            <div class="column">
+                <h2>Input</h2>
+                <div id="input-img"></div>
+            </div>
+            <div class="column">
+                <h2>Output</h2>
+                <div id="output-img"></div>
+            </div>
+        </div>
+
     </body>
 
     <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="assets/dropzone/dropzone.min.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="assets/dropzone/dropzone_custom.js"></script>
 
 </html>
