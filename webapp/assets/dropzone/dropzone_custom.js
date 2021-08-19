@@ -9,9 +9,14 @@ Dropzone.options.myDropzone = {
 	method: "post",
 	uploadMultiple: true,
 	maxFiles: 3,
+	parallelUploads: 3,
 
 	init: function() {
 		var submitButton = document.querySelector("#submit-all")
+		var input = document
+				.querySelector("div#input-img");
+		var output = document
+				.querySelector("div#output-img");
 		myDropzone = this; // closure
 
 		submitButton.addEventListener("click", function() {
@@ -28,13 +33,12 @@ Dropzone.options.myDropzone = {
 
 		this.on("reset", function() {
 			submitButton.disabled = true;
+
+			input.innerHTML = '';
+			output.innerHTML = '';
 		});
 
 		this.on("successmultiple", function(obj, response) {
-			var input = document
-				.querySelector("div#input-img");
-			var output = document
-				.querySelector("div#output-img");
 
 			for (var img_name in response) {
 				inputImg = document.createElement('img');

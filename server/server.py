@@ -91,11 +91,14 @@ def _read_from_tmp_and_predict(dir_to_read, f_name2path = None, is_mat = False, 
 	# load images from the tmp folder
 	if not is_mat:
 		tmp_iterator = Iterator.imgs_from_folder(directory=dir_to_read, normalize=True, output_shape=(1, 512, 512, 1))
-	
+		preds = unet.predict(tmp_iterator, verbose=1)
+
 	else:
 		tmp_iterator = Iterator.mat_from_folder(directory=dir_to_read, normalize=(not mat_normalized), output_shape=(1, 512, 512, 1))
+		# _, preds = unet.predict(tmp_iterator, verbose=1, threshold=0.5)
+		preds = unet.predict(tmp_iterator, verbose=1)
 
-	return unet.predict(tmp_iterator, verbose=1)
+	return preds
 
 # create a new sub-folder (under tmp) to store each upload/prediction
 def _create_tmp_subfolder():
@@ -204,6 +207,8 @@ def predict_from_mat():
 	# iterate over the subfolder within tmp 
 	preds = _read_from_tmp_and_predict(sub_tmp_dir, is_mat=True)
 	print('Predictions (no.', len(preds), ') with shape', preds.shape)
+
+	print(preds)
 
 	saved_imgs = Images.save_as_imgs(os.path.join(sub_tmp_dir, "preds"), preds, f_name2path)
 	print('Saved predictions as images', saved_imgs)
