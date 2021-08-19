@@ -1,5 +1,11 @@
 (function() {
-	// Source:
+
+    var endpoint = "http://0.0.0.0:5000";
+    var minH = 512;
+    var minW = 512;
+    var workWithRGBImages = false
+	
+    // Source:
 	// https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_magnifier_glass
 
 	// STEPS
@@ -44,8 +50,56 @@
         imgCanvas.addEventListener("mousemove", moveMagnifier);
 
         // Step 3
-        // TODO: click to get the matrix
+        // TODO: click to get the selection onto which predict
         glass.addEventListener("click", clickMagnifier);
+
+        // reduce RGB image to a gray-scaled one (by computing avg)
+        function RGBToGray (pixels) {
+            grayPx = [];
+
+            // RGBa to Gray scale
+            for (var i = 0; i < pixels.length; i += 4) {
+                red = pixels[i];
+                green = pixels[i + 1];
+                blue = pixels[i + 2];
+                    
+                gray = (red + green + blue) / 3;
+                    
+                grayPx.push(gray);
+            }
+            return grayPx;
+        }
+
+        function askForPrediction (pixels) {
+            xhttp = new XMLHttpRequest;
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var response = JSON.parse(this.responseText);
+                    var output = document
+                        .querySelector("div#output-img");
+
+                    output.innerHTML = '';
+
+                    for (var img_name in response) {
+                        outputImg = document.createElement('img');
+                        outputImg.src = response[img_name]['output']
+                        output.appendChild(outputImg);
+                    }
+                }
+            };
+            xhttp.open("POST", endpoint + "/from_mat", true);
+            xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+
+            // Send as an array of arrays
+            xhttp.send(JSON.stringify(
+                {
+                    "images": [
+                        pixelsArr
+                    ],
+                    "normalized": false
+                }
+            ));
+        }
 
         function clickMagnifier (e) {
         	gPos = glassPos(e);
@@ -57,33 +111,37 @@
     	    image.src = croppedCan.toDataURL();
     	  
     	    // Put the image where you need to.
-    	    $("#selection-and-prediction").html("<h3>Selection</h3><br>").append(image);
+    	    $("#input-img").empty().append(image);
     	   	
     	   	pixels = croppedCanCtx.getImageData(0, 0, glass.offsetWidth, glass.offsetHeight).data;
-    	   	reducedPixels = [];
 
-    	   	// RGBa to Gray scale
-        	for (var i = 0; i < pixels.length; i += 4) {
-        		red = pixels[i];
-        		green = pixels[i + 1];
-        		blue = pixels[i + 2];
-        		    
-        		gray = (red + green + blue) / 3;
-        		    
-        		reducedPixels.push(gray);
-        	}
+            // Obtain a scale-of-gray image
+            if (workWithRGBImages) {
+                pixels = RGBToGray(pixels);
+            }
 
-        	// TODO: prediction
-        	console.log("reducedPixels", reducedPixels);
-        	$("#selection-and-prediction").append("<h3>Prediction</h3><br>" + reducedPixels);
+            // convert to regular array
+            pixelsArr = Array.prototype.slice.call(pixels);
+            
+        	// TODO: prediction and visualization into output-img
+            // TODO: show it as an overlay?
+        	// console.log("pixelsArr", pixelsArr);
+        	// $("#selection-and-prediction").append("<h3>Prediction</h3><br>" + pixelsArr);
+            askForPrediction(pixelsArr);
+
+            // Scroll down to notify the user
+            $('html,body').animate({
+                scrollTop: $("#selection-and-prediction").offset().top
+            }, 'slow');
 
         	return {
-        		reducedPixels: reducedPixels,
+        		pixelsArr: pixelsArr,
         		w: glass.offsetWidth,
         		h: glass.offsetHeight
         	};
         }
 
+        // get box's x/y position in the canvas
         function glassPos (e) {
         	var pos, x, y;
             
@@ -115,6 +173,7 @@
             }
         }
 
+        // move the box on hover
         function moveMagnifier(e) {
         	// get glass position
             gPos = glassPos(e);
@@ -124,6 +183,7 @@
             glass.style.top = (gPos.y - h) + "px";
         }
 
+        // get cursor's x/y position in the canvas
         function getCursorPos(e) {
             var a, x = 0, y = 0;
             e = e || window.event;
@@ -155,7 +215,6 @@
         // 
         // Source:
         // https://stackoverflow.com/questions/35188022/how-to-cut-an-image-html-canvas-in-half-via-javascript
-
 		function crop(can, a, b) {
 		    // get your canvas and a context for it
 		    var ctx = can.getContext('2d');
@@ -164,19 +223,29 @@
 		    var imageData = ctx.getImageData(a.x, a.y, b.x, b.y);
 		  
 		    // create a new cavnas same as clipped size and a context
-		    var newCan = document.createElement('canvas');
+            var newCan = document.createElement('canvas');
+		    var scaleCan = document.createElement('canvas');
 		    newCan.width = b.x - a.x;
 		    newCan.height = b.y - a.y;
-		    var newCtx = newCan.getContext('2d');
+            scaleCan.width = minW;
+            scaleCan.height = minH;
+            var newCtx = newCan.getContext('2d');
+		    var scaleCtx = scaleCan.getContext('2d');
 		  
 		    // put the clipped image on the new canvas.
 		    newCtx.putImageData(imageData, 0, 0);
+
+            // TODO: make this dynamic depending on the size of the selection box
+            // scale x2 (256px -> minH/minW)
+            scaleCtx.scale(2, 2);
+            scaleCtx.drawImage(newCan, 0, 0);
 		  
-		    return newCan;    
+		    return scaleCan;    
 		 }
     }
 
-    // Init
+    // TODO: do not hardcode this...
+    // init
     magnify("assets/0-5_1536x1024.png", 1536, 1024);
 
 })();
