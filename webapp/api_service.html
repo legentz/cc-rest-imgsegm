@@ -6,16 +6,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <style>
-        nav, ol, ul {
-            list-style: none;
-            padding: 0;
-            text-align: center;
-        }
-
-        li {
-            padding: 10px 0;
-        }
-
         .container { 
           height: 400px;
           position: relative;
@@ -24,32 +14,70 @@
         .center {
           margin: 0;
           position: absolute;
-          top: 50%;
+          top: 100%;
           left: 50%;
           -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
+          text-align: center;
+        }
+        pre {
+            text-align: left;
+        }
+        p.left {
+            text-align: left;
         }
         </style>
     </head>
 
     <body>
-        <h1>EM Segmentation App</h1>
+        <h1>API Service</h1>
 
         <div class="container">
             <div class="center"> 
-                <img src="./assets/home.png">
-                <nav>
-                    <ul>
-                        <li><a href="from_images.html">Upload and predict</a></li>
-                        <li><a href="from_selection.html">Predict from portion (of a bigger image)</a></li>
-                        <li><a href="api_service.html">API service</a></li>
-                        <li><a href="credits.html">Credits</a></li>
-                    </ul>
-                </nav>
+                <img width="300" src="https://lh3.googleusercontent.com/proxy/9UDYIXO_2YQyfVRL0OKu0ZomJ3UlEF7EmcUzXDS43OoLkwrp8VtZlQHcyEggQxeYcT4i4phI5P2Kw_Zbprz-IAyreavzCxxDpAOKLHIq_XpjVNtqeX4kKoUaruJkt5tAMmH7esxaQyc_RrR8iej1SlBRQ2D1FwKOBlxsa5V4DO4mzBZtUfjODdANoVF4iqj6yf8">
+                
+                <br>
+                
+                <p>Tools like cURL may be used to perform requests programmatically. The feature is work in progress.
+                <br>Here's the list of the available endpoint:<br><p>
+
+                <h3>Request</h3>
+
+                <p class="left"><strong>URL:</strong> <i>http://0.0.0.0:5000/from_mat</i></p>
+                <p class="left"><strong>Type:</strong> <i>POST</i></p>
+                <p class="left"><strong>Headers:</strong> <i>Content-type: application/json;charset=UTF-8</i></p>
+                <p class="left"><strong>Body:</strong></p>
+
+                <pre><code>
+{
+    // Gray-scaled 512x512 image(s)
+    "images": [
+        [...],
+    ],
+
+    // To inform the server we deal with 0-255 values and not 0-1
+    "normalized": false
+}
+                </code></pre>
+                
+                <br><br>
+
+                <h3>Response</h3>
+                <p>The server will answer back with a JSON containing name of the image(s) in the form of a UUID<br> along with the input/output URL. <br>A .mat generated file representing the image sent during<br> the request whilst the output will contain a URL to actually see the prediction.</p>
+                <p class="left"><strong>Data (with code 200):</strong></p>
+                
+                <pre><code>
+{
+    "e0af4fcc-2c90-4629-bf08-3baa1d089ed8": {
+        "input": "http://0.0.0.0:5000/tmp/2021-08-19_19-21-29/9c85b19c-a8d2-4be0-819f-9cdfa57f4f79.mat",
+        "output": "http://0.0.0.0:5000/tmp/2021-08-19_19-21-29/preds/e0af4fcc-2c90-4629-bf08-3baa1d089ed8.png"
+    }
+}
+                </code></pre>
+                
+                <a href="index.html"><i>Go back home</i></a>
             </div>
         </div>
 
     </body>
-
-    <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
 </html>
