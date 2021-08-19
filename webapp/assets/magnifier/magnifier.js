@@ -3,7 +3,6 @@
     var endpoint = "http://0.0.0.0:5000";
     var minH = 512;
     var minW = 512;
-    var workWithRGBImages = false
 	
     // Source:
 	// https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_magnifier_glass
@@ -15,7 +14,7 @@
 	// 4. Show it as an image (creating an Image element) and as binary Matrix
 
     function magnify(imgURL, imgW, imgH) {
-        var img, glass, w, h, bw;
+        let img, glass, w, h, bw;
 
         // Step 1
         img = new Image();
@@ -23,8 +22,8 @@
         img.height = imgH;
         img.src = imgURL;
 
-        imgCanvas = document.createElement("canvas");
-        imgCtx = imgCanvas.getContext("2d");
+        let imgCanvas = document.createElement("canvas");
+        let imgCtx = imgCanvas.getContext("2d");
 
         imgCanvas.width = imgW;
         imgCanvas.height = imgH;
@@ -37,7 +36,7 @@
         glass = document.createElement("div");
         glass.setAttribute("class", "img-magnifier-glass");
 
-        mainDiv = document.getElementsByClassName("img-magnifier-container")[0]; // TODO: use id instead of class
+        let mainDiv = document.getElementsByClassName("img-magnifier-container")[0]; // TODO: use id instead of class
         mainDiv.appendChild(imgCanvas);
         mainDiv.insertBefore(glass, imgCanvas); 
 
@@ -55,15 +54,15 @@
 
         // reduce RGB image to a gray-scaled one (by computing avg)
         function RGBToGray (pixels) {
-            grayPx = [];
+            let grayPx = [];
 
             // RGBa to Gray scale
-            for (var i = 0; i < pixels.length; i += 4) {
-                red = pixels[i];
-                green = pixels[i + 1];
-                blue = pixels[i + 2];
+            for (let i = 0; i < pixels.length; i += 4) {
+                let red = pixels[i];
+                let green = pixels[i + 1];
+                let blue = pixels[i + 2];
                     
-                gray = (red + green + blue) / 3;
+                let gray = (red + green + blue) / 3;
                     
                 grayPx.push(gray);
             }
@@ -71,18 +70,20 @@
         }
 
         function askForPrediction (pixels) {
-            xhttp = new XMLHttpRequest;
+            let xhttp = new XMLHttpRequest;
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var response = JSON.parse(this.responseText);
-                    var output = document
-                        .querySelector("div#output-img");
+                    let response = JSON.parse(this.responseText);
 
+                    // prepare div to visualize response
+                    let output = document
+                        .querySelector("div#output-img");
                     output.innerHTML = '';
 
-                    for (var img_name in response) {
-                        outputImg = document.createElement('img');
+                    for (let img_name in response) {
+                        let outputImg = document.createElement('img');
                         outputImg.src = response[img_name]['output']
+                        
                         output.appendChild(outputImg);
                     }
                 }
@@ -91,59 +92,51 @@
             xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 
             // Send as an array of arrays
-            xhttp.send(JSON.stringify(
+            xhttp.send(
+                JSON.stringify(
                 {
                     "images": [
-                        pixelsArr
+                        pixels
                     ],
                     "normalized": false
-                }
-            ));
+                })
+            );
         }
 
         function clickMagnifier (e) {
-        	gPos = glassPos(e);
-        	croppedCan = crop(imgCanvas, {x: gPos.x - w, y: gPos.y - h}, {x: gPos.x + w, y: gPos.y + h});
-        	croppedCanCtx = croppedCan.getContext("2d");
+        	let gPos = glassPos(e);
+        	let cropped = crop(imgCanvas, {x: gPos.x - w, y: gPos.y - h}, {x: gPos.x + w, y: gPos.y + h});
+            let croppedCan = cropped.canvas;
+            let croppedCanCtx = cropped.context;
         	    
     	    // Create an image for the new canvas.
-    	    var image = new Image();
+    	    let image = new Image();
     	    image.src = croppedCan.toDataURL();
     	  
     	    // Put the image where you need to.
     	    $("#input-img").empty().append(image);
     	   	
-    	   	pixels = croppedCanCtx.getImageData(0, 0, glass.offsetWidth, glass.offsetHeight).data;
+    	   	let pixels = croppedCanCtx.getImageData(0, 0, croppedCan.width, croppedCan.height).data;
 
-            // Obtain a scale-of-gray image
-            if (workWithRGBImages) {
-                pixels = RGBToGray(pixels);
-            }
-
-            // convert to regular array
-            pixelsArr = Array.prototype.slice.call(pixels);
+            // Obtain a gray-scaled image
+            let pixelsGray = RGBToGray(pixels);
+            // convert to regular array (use this with uIntArray from RGB canvas)
+            // pixels = Array.prototype.slice.call(pixels);
             
-        	// TODO: prediction and visualization into output-img
-            // TODO: show it as an overlay?
-        	// console.log("pixelsArr", pixelsArr);
-        	// $("#selection-and-prediction").append("<h3>Prediction</h3><br>" + pixelsArr);
-            askForPrediction(pixelsArr);
+            // Async request
+            askForPrediction(pixelsGray);
 
             // Scroll down to notify the user
             $('html,body').animate({
                 scrollTop: $("#selection-and-prediction").offset().top
             }, 'slow');
 
-        	return {
-        		pixelsArr: pixelsArr,
-        		w: glass.offsetWidth,
-        		h: glass.offsetHeight
-        	};
+        	return false;
         }
 
         // get box's x/y position in the canvas
         function glassPos (e) {
-        	var pos, x, y;
+        	let pos, x, y;
             
             /*prevent any other actions that may occur when moving over the image*/
             e.preventDefault();
@@ -176,7 +169,7 @@
         // move the box on hover
         function moveMagnifier(e) {
         	// get glass position
-            gPos = glassPos(e);
+            let gPos = glassPos(e);
 
             /*set the position of the magnifier glass:*/
             glass.style.left = (gPos.x - w) + "px";
@@ -185,7 +178,7 @@
 
         // get cursor's x/y position in the canvas
         function getCursorPos(e) {
-            var a, x = 0, y = 0;
+            let a, x = 0, y = 0;
             e = e || window.event;
             
             /*get the x and y positions of the image:*/
@@ -217,20 +210,20 @@
         // https://stackoverflow.com/questions/35188022/how-to-cut-an-image-html-canvas-in-half-via-javascript
 		function crop(can, a, b) {
 		    // get your canvas and a context for it
-		    var ctx = can.getContext('2d');
+		    let ctx = can.getContext('2d');
 		    
 		    // get the image data you want to keep.
-		    var imageData = ctx.getImageData(a.x, a.y, b.x, b.y);
+		    let imageData = ctx.getImageData(a.x, a.y, b.x, b.y);
 		  
 		    // create a new cavnas same as clipped size and a context
-            var newCan = document.createElement('canvas');
-		    var scaleCan = document.createElement('canvas');
+            let newCan = document.createElement('canvas');
+		    let scaleCan = document.createElement('canvas');
 		    newCan.width = b.x - a.x;
 		    newCan.height = b.y - a.y;
             scaleCan.width = minW;
             scaleCan.height = minH;
-            var newCtx = newCan.getContext('2d');
-		    var scaleCtx = scaleCan.getContext('2d');
+            let newCtx = newCan.getContext('2d');
+		    let scaleCtx = scaleCan.getContext('2d');
 		  
 		    // put the clipped image on the new canvas.
 		    newCtx.putImageData(imageData, 0, 0);
@@ -240,7 +233,10 @@
             scaleCtx.scale(2, 2);
             scaleCtx.drawImage(newCan, 0, 0);
 		  
-		    return scaleCan;    
+		    return {
+                "canvas": scaleCan,
+                "context": scaleCtx
+            }    
 		 }
     }
 
