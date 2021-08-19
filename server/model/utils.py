@@ -148,8 +148,6 @@ class Images(object):
 		# TODO: handle labels instead of sorting
 		imgs = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 		imgs.sort()
-		# imgs = os.listdir(path)
-		# imgs.sort(key=lambda f: int(re.sub('\D', '', f)))
 		n_imgs = len(imgs) 
 		rows = ceil(n_imgs / cols) 
 

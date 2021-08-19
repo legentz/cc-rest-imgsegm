@@ -120,13 +120,6 @@ def _create_tmp_subfolder():
 # Flask routes
 #
 
-# statically serve files
-# NOTE: this is not suggested in production for a matter of security
-# NOTE: disable directory listing
-# @app.route('/preds/<name>')
-# def download_file(path, name):
-# 	return send_from_directory(path, name)
-
 # upload one ore more images (locally), using uuid for file names,
 # predict and serve results
 # NOTE: replace local upload with Amazon S3 to store and serve images 
@@ -207,8 +200,6 @@ def predict_from_mat():
 	# iterate over the subfolder within tmp 
 	preds = _read_from_tmp_and_predict(sub_tmp_dir, is_mat=True)
 	print('Predictions (no.', len(preds), ') with shape', preds.shape)
-
-	print(preds)
 
 	saved_imgs = Images.save_as_imgs(os.path.join(sub_tmp_dir, "preds"), preds, f_name2path)
 	print('Saved predictions as images', saved_imgs)

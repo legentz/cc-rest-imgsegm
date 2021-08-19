@@ -1,47 +1,51 @@
 (function() {
 
     var endpoint = "http://0.0.0.0:5000";
+
+    // This values are required by the model since it cannot perform
+    // predictions on images.shape != (1, 512, 512, 1)
     var minH = 512;
     var minW = 512;
+
+    // Scale factor is necessary if dealing with a selection
+    // box (glass) less than 512x512.
+    // Default glass dimensions 256x256, hence the scaling factor is 2 (both x, y)
+    var scaleX = 2;
+    var scaleY = 2;
 	
-    // Source:
-	// https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_magnifier_glass
-
-	// STEPS
-	// 1. Create a canvas from the img.src
-	// 2. Use the moving box as a pointer moving it around
-	// 3. On click, create a new canvas with the extracted portion of the image
-	// 4. Show it as an image (creating an Image element) and as binary Matrix
-
+    // Source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_magnifier_glass
     function magnify(imgURL, imgW, imgH) {
         let img, glass, w, h, bw;
 
-        // Step 1
+        // Create an image and set the src
         img = new Image();
         img.width = imgW;
         img.height = imgH;
         img.src = imgURL;
 
+        // Create a canvas where to transfer the content from the <img>
         let imgCanvas = document.createElement("canvas");
         let imgCtx = imgCanvas.getContext("2d");
 
         imgCanvas.width = imgW;
         imgCanvas.height = imgH;
 
+        // Draw from the img to the canvas
         img.onload = function () {
         	imgCtx.drawImage(img, 0, 0, imgW, imgH);
         };
 
-        // Step 2
+        // Creating the selection box (glass)
         glass = document.createElement("div");
         glass.setAttribute("class", "img-magnifier-glass");
 
+        // append the glass in position absolute over the canvas
         let mainDiv = document.getElementsByClassName("img-magnifier-container")[0]; // TODO: use id instead of class
         mainDiv.appendChild(imgCanvas);
         mainDiv.insertBefore(glass, imgCanvas); 
 
-        bw = 2; // TODO: border width not hardcoded
-        w = glass.offsetWidth / 2;
+        bw = 2;                         // TODO: border (width) of the glass should not be hardcoded
+        w = glass.offsetWidth / 2;      
         h = glass.offsetHeight / 2;
 
         /*execute a function when someone moves the magnifier glass over the image:*/
@@ -52,7 +56,8 @@
         // TODO: click to get the selection onto which predict
         glass.addEventListener("click", clickMagnifier);
 
-        // reduce RGB image to a gray-scaled one (by computing avg)
+        // reduce RGB image to a gray-scaled one (by computing the avg of the 4 RGBa channels)
+        // we need to do this since canvas is going to be always 4-channel
         function RGBToGray (pixels) {
             let grayPx = [];
 
@@ -69,17 +74,24 @@
             return grayPx;
         }
 
+        // XHTTP async request to ask for a prediction
         function askForPrediction (pixels) {
             let xhttp = new XMLHttpRequest;
+
             xhttp.onreadystatechange = function() {
+
+                // if everything went smooth...
                 if (this.readyState == 4 && this.status == 200) {
+
+                    // parse the response from the server
                     let response = JSON.parse(this.responseText);
 
-                    // prepare div to visualize response
+                    // prepare div to visualize response (empty the container first)
                     let output = document
                         .querySelector("div#output-img");
                     output.innerHTML = '';
 
+                    // process the response and display results
                     for (let img_name in response) {
                         let outputImg = document.createElement('img');
                         outputImg.src = response[img_name]['output']
@@ -88,17 +100,19 @@
                     }
                 }
             };
+
+            // TODO: endpoints should be global
             xhttp.open("POST", endpoint + "/from_mat", true);
             xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 
-            // Send as an array of arrays
+            
             xhttp.send(
                 JSON.stringify(
                 {
-                    "images": [
+                    "images": [         // Send as an array of arrays since the server may accept more than one matrix (img)
                         pixels
                     ],
-                    "normalized": false
+                    "normalized": false // Telling the server we deal with 0-255 values and not 0-1
                 })
             );
         }
@@ -230,7 +244,7 @@
 
             // TODO: make this dynamic depending on the size of the selection box
             // scale x2 (256px -> minH/minW)
-            scaleCtx.scale(2, 2);
+            scaleCtx.scale(scaleX, scaleY);
             scaleCtx.drawImage(newCan, 0, 0);
 		  
 		    return {
@@ -240,7 +254,7 @@
 		 }
     }
 
-    // TODO: do not hardcode this...
+    // TODO: do not hardcode like this...
     // init
     magnify("assets/0-5_1536x1024.png", 1536, 1024);
 
