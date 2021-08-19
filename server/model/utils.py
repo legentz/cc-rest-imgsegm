@@ -46,8 +46,6 @@ class Iterator(object):
 			if output_shape is not None:
 				img = img.reshape(output_shape)
 
-			print("Providing image", img)
-
 			yield(img)
 
 	'''
@@ -76,18 +74,12 @@ class Iterator(object):
 				print('WARNING:', exc_info()[0])
 				continue
 
-			# img to ndarray
-			# img = np.asarray(img)
-			print('debug mat', img.shape)
-
 			# normalize data 
 			if normalize: img = img / img.max()
 
 			# if output_shape, reshape!
 			if output_shape is not None:
 				img = img.reshape(output_shape)
-
-			print("Providing image", img)
 
 			yield(img)
 
@@ -195,10 +187,9 @@ class Images(object):
 
 			# reshape and save
 			arr_im = np.uint8(arr.reshape((preds.shape[1], preds.shape[2])) * 255)
-			print("arr_im", arr_im.shape, arr_im)
+			print("arr_im", arr_im.shape)
+			
 			im = Image.fromarray(arr_im, mode='L')
-			# im = Image.fromarray(np.uint8(arr.reshape(preds.shape[1], preds.shape[2])) * 255)
-
 			print('image values before saving', im)
 
 			im_path = os.path.join(output_dir, f_name_ext)
