@@ -1,6 +1,7 @@
 (function() {
 
-    var endpoint = "http://0.0.0.0:5000";
+    var baseURL = "http://0.0.0.0:5000";
+    var endpointMat = baseURL + "/from_mat"
 
     // This values are required by the model since it cannot perform
     // predictions on images.shape != (1, 512, 512, 1)
@@ -102,7 +103,7 @@
             };
 
             // TODO: endpoints should be global
-            xhttp.open("POST", endpoint + "/from_mat", true);
+            xhttp.open("POST", endpointMat, true);
             xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 
             
@@ -117,6 +118,11 @@
             );
         }
 
+        // When the user clicks on the canvas, the bounded region will be extracted (cropped and scaled properly)
+        // to reach the minH/minW. At the moment scaling and selection box configuration is manual only.
+        // The extacted region will be reduced to one-channel only instead of 4 (RGBa) in order to ask a
+        // prediction to the server through an async request.
+        // Finally, the resulting prediction will be displayed to the user.
         function clickMagnifier (e) {
         	let gPos = glassPos(e);
         	let cropped = crop(imgCanvas, {x: gPos.x - w, y: gPos.y - h}, {x: gPos.x + w, y: gPos.y + h});
@@ -130,17 +136,18 @@
     	    // Put the image where you need to.
     	    $("#input-img").empty().append(image);
     	   	
+            // Obtaining the pixels from the selected region
     	   	let pixels = croppedCanCtx.getImageData(0, 0, croppedCan.width, croppedCan.height).data;
 
-            // Obtain a gray-scaled image
+            // Obtain a gray-scaled image (1-channel)
             let pixelsGray = RGBToGray(pixels);
             // convert to regular array (use this with uIntArray from RGB canvas)
             // pixels = Array.prototype.slice.call(pixels);
             
-            // Async request
+            // Async request for a prediction
             askForPrediction(pixelsGray);
 
-            // Scroll down to notify the user
+            // Scroll down to let the user know
             $('html,body').animate({
                 scrollTop: $("#selection-and-prediction").offset().top
             }, 'slow');
@@ -148,7 +155,7 @@
         	return false;
         }
 
-        // get box's x/y position in the canvas
+        // Get box's x/y position in the canvas
         function glassPos (e) {
         	let pos, x, y;
             
@@ -180,12 +187,13 @@
             }
         }
 
-        // move the box on hover
+        // update the position of the box when hovering the canvas
         function moveMagnifier(e) {
+
         	// get glass position
             let gPos = glassPos(e);
 
-            /*set the position of the magnifier glass:*/
+            // set the position of the magnifier glass
             glass.style.left = (gPos.x - w) + "px";
             glass.style.top = (gPos.y - h) + "px";
         }
@@ -195,14 +203,14 @@
             let a, x = 0, y = 0;
             e = e || window.event;
             
-            /*get the x and y positions of the image:*/
+            // get the x and y positions of the image
             a = imgCanvas.getBoundingClientRect();
 
-            /*calculate the cursor's x and y coordinates, relative to the image:*/
+            // calculate the cursor's x and y coordinates, relative to the image
             x = e.pageX - a.left;
             y = e.pageY - a.top;
             
-            /*consider any page scrolling:*/
+            // consider any page scrolling
             x = x - window.pageXOffset;
             y = y - window.pageYOffset;
             
@@ -223,6 +231,7 @@
         // Source:
         // https://stackoverflow.com/questions/35188022/how-to-cut-an-image-html-canvas-in-half-via-javascript
 		function crop(can, a, b) {
+
 		    // get your canvas and a context for it
 		    let ctx = can.getContext('2d');
 		    
@@ -232,24 +241,24 @@
 		    // create a new cavnas same as clipped size and a context
             let newCan = document.createElement('canvas');
 		    let scaleCan = document.createElement('canvas');
+            let newCtx = newCan.getContext('2d');
+            let scaleCtx = scaleCan.getContext('2d');
+
 		    newCan.width = b.x - a.x;
 		    newCan.height = b.y - a.y;
             scaleCan.width = minW;
             scaleCan.height = minH;
-            let newCtx = newCan.getContext('2d');
-		    let scaleCtx = scaleCan.getContext('2d');
 		  
 		    // put the clipped image on the new canvas.
 		    newCtx.putImageData(imageData, 0, 0);
 
-            // TODO: make this dynamic depending on the size of the selection box
-            // scale x2 (256px -> minH/minW)
+            // apply the scaling factor
             scaleCtx.scale(scaleX, scaleY);
             scaleCtx.drawImage(newCan, 0, 0);
 		  
 		    return {
-                "canvas": scaleCan,
-                "context": scaleCtx
+                canvas: scaleCan,
+                context: scaleCtx
             }    
 		 }
     }
