@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <style>
+        nav, ol, ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        li {
+            padding: 10px 0;
+        }
+
+        .container { 
+          height: 400px;
+          position: relative;
+        }
+
+        .center {
+          margin: 0;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+        }
+        </style>
+    </head>
+
+    <body>
+        <h1>EM Segmentation App</h1>
+
+        <div class="container">
+            <div class="center"> 
+                <img src="./assets/home.png">
+                <nav>
+                    <ul>
+                        <li><a href="from_images.html">Upload and predict</a></li>
+                        <li><a href="from_selection.html">Predict from portion (of a bigger image)</a></li>
+                        <li><a href="api_service.html">API service</a></li>
+                        <li><a href="credits.html">Credits</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </body>
+
+    <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
+</html>

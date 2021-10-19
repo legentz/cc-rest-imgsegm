@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" type="text/css" href="assets/magnifier/magnifier.css">
+        <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        /* Create two equal columns that floats next to each other */
+        .column {
+          float: left;
+          width: 50%;
+          padding: 10px;
+          height: 300px; /* Should be removed. Only for demonstration */
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+        </style>
+    </head>
+
+    <body>
+        <h1>Predict from selection</h1>
+
+        <!-- Magnifier -->
+        <div class="img-magnifier-container"></div>
+        <div class="row" id="selection-and-prediction">
+            <div class="column">
+                <h2>Input</h2>
+                <div id="input-img"></div>
+            </div>
+            <div class="column">
+                <h2>Output</h2>
+                <div id="output-img"></div>
+            </div>
+        </div>
+
+        <br>
+        <a href="index.html"><i>Go back home</i></a>
+    </body>
+
+    <script type="text/javascript" src="assets/jquery/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="assets/magnifier/magnifier.js"></script>
+
+</html>

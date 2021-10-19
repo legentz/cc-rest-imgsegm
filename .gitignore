@@ -8,9 +8,15 @@ __pycache__
 # J Notebook
 .ipynb_checkpoints/
 
-# Data
-data/**
-#!data/pre_trained.zip
+# tmp
+server/tmp/**
+!server/tmp/.gitkeep
+
+# model
+server/model/data/**
+!server/model/data/.gitkeep
+server/model/weights/**
+!server/model/weights/.gitkeep
 
 # Model checkpoints or .h5
 *.h5
