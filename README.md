@@ -18,7 +18,7 @@ conda env list
 conda activate tf-xxxxx
 ```
 
-It is suggested to open to separate terminal tabs, one to run the Webapp (make sure you run the steps below first) and the other for the Server (where real-time logs will be shown).
+It is suggested to open to separate terminal tabs, one to run the Webapp (make sure you run the steps below first) and the other for the Server (where real-time logs will be shown). TOP
 
 ## Webapp
 
