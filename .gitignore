@@ -21,3 +21,4 @@ server/model/weights/**
 # Model checkpoints or .h5
 *.h5
 checkpoints/
+tf-linux.yml
