@@ -5,7 +5,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 from model import UNet
 from data import EMData
-from utils import Iterator, Images
+from utils import Iterator
 
 # dataset
 DATASET_PATH = './data'
