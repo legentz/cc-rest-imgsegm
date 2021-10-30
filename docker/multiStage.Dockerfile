@@ -43,4 +43,4 @@ RUN echo "${PWD}"
 # activated:
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT source /venv/bin/activate && \
-           python -c "import flask; print('success!')" && python server.py
+           python -c "print('success!')" && python server.py

@@ -1,4 +1,4 @@
-name: cc-prj
+name: ccserver
 channels:
   - defaults
 dependencies:
