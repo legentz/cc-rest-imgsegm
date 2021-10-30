@@ -7,15 +7,9 @@ WORKDIR /server
 # Copio tutti file necessari per runnare il server
 COPY server/config ./config
 
-# Creo l'environment utilizzando lo yaml
-RUN conda env create -f config/server_conda.yml
-
-# Install conda-pack:
-RUN conda install -c conda-forge conda-pack
-
-# Eseguite solo per scopo di debug conflitti dipendenze
-RUN conda list
-RUN pip list
+# Creo l'environment utilizzando lo yaml e installo conda-pack
+RUN conda env create -f config/server_conda.yml && \
+    conda install -c conda-forge conda-pack
 
 # Use conda-pack to create a standalone enviornment
 # in /venv:
@@ -31,14 +25,14 @@ RUN /venv/bin/conda-unpack
 # The runtime-stage image; we can use Debian as the
 # base image since the Conda env also includes Python
 # for us.
-FROM debian:buster AS runtime
+FROM debian:buster-slim AS runtime
 
 # Copy /venv from the previous stage:
 COPY --from=build /venv /venv
 COPY server/model ./model
 COPY server/tmp ./tmp
 COPY server/server.py .
-RUN echo "${PWD}"
+
 # When image is run, run the code with the environment
 # activated:
 SHELL ["/bin/bash", "-c"]
