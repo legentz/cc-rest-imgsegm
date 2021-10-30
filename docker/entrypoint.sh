@@ -1,4 +1,6 @@
 #!/bin/bash --login
+# DEPRECATED
+
 # The --login ensures the bash configuration is loaded,
 # enabling Conda.
 

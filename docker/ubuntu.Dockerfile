@@ -1,4 +1,5 @@
 FROM ubuntu:18.04
+# DEPRECATED
 SHELL [ "/bin/bash", "--login", "-c" ]
 
 # Create a non-root user

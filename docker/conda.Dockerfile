@@ -1,5 +1,5 @@
 FROM continuumio/miniconda3
-
+# DEPRECATED
 WORKDIR /server
 
 # Create the environment:

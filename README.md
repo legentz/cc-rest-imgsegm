@@ -145,3 +145,48 @@ The model comes pre-trained. You may want download the pre_trained.zip [here](ht
 #### Playground
 
 The service comes from another project [NN4DS](https://github.com/legentz/nn4ds-2020). You might find the jupyter notebook file useful to deal with experiments, debug/re-train the model and so on. However, _it is not necessary for the sake of the CC project._ 
+
+## Docker
+
+Use the following commands to build and run docker containers for server and webapp.<br>
+**Make sure to be into the docker folder (...cc-rest-imgsegm/docker) when running build command.**<br>
+
+**You can run build command from project's root path, but you must add ```docker/``` to dockerfiles path<br> and replace build’s context path with```.``` instead of ```../```**
+### Build & Run Server
+
+Build _(takes some time)_:
+```
+docker build -t server/conda-debian:v1.0 --file server.Dockerfile ../ 
+```
+
+Run _(no need to be in docker folder path when running)_:
+```
+docker run -p 5000:5000 server/conda-debian:v1.0 
+```
+
+**OPTIONAL**: Add ```-d``` to run container in background<br>
+**OPTIONAL**: Add ```--name``` to assign a name to container
+
+
+### Build & Run Webapp
+
+Build:
+```
+docker build --rm -t webapp/nginx-alpine:v1.0 --file webapp.Dockerfile ../ 
+```
+
+Run _(no need to be in docker folder path when running)_:
+```
+docker run -p 80:80 webapp/nginx-alpine:v1.0 
+```
+
+**OPTIONAL**: Add ```-d``` to run container in background<br>
+**OPTIONAL**: Add ```--name``` to assign a name to container
+
+
+### Clean Up
+To remove all dangling images
+```
+docker image prune
+```
+Add ```-a``` to remove all images not referenced by any container
