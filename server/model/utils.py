@@ -1,11 +1,9 @@
 # TODO: better imports... more specific
 import os, re
 import numpy as np 
-import matplotlib.pyplot as plt
-from matplotlib import cm
 from sys import exc_info
 from math import ceil
-from PIL import Image, ImageOps
+from PIL import Image
 
 '''
 This class shall contain only simple/dummy generators (...maybe Iterator isn't the right name)
