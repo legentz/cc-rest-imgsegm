@@ -6,7 +6,6 @@ from flask import Flask, flash, jsonify, request, redirect, url_for
 from flask_cors import CORS, cross_origin
 from datetime import datetime
 from model.model import UNet
-from model.data import EMData
 from model.utils import Iterator, Images
 
 import numpy as np
