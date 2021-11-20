@@ -190,3 +190,44 @@ To remove all dangling images
 docker image prune
 ```
 Add ```-a``` to remove all images not referenced by any container
+
+## Kubernetes
+
+Some infos about kubernetes
+
+### Load docker images into Kubernetes
+Swap **minikube** with any other Kubernetes install version
+
+```
+minikube image load server/conda-debian:v1.0
+minikube image load webapp/nginx-alpine:v1.0
+```
+
+### Create Deployment service using an image
+WARNING: **kubectl** is an Alias for **minikube kubectl --** 
+```
+kubectl create deployment ccserver --image=server/conda-debian:v1.0
+kubectl create deployment ccwebapp --image=webapp/nginx-alpine:v1.0
+```
+
+### Expose Deployment service
+```
+kubectl expose deployment ccserver --type=LoadBalancer --port=5000
+kubectl expose deployment ccwebapp --type=LoadBalancer --port=80
+```
+
+### Port forwarding of services requests
+Actually don't remember if port 80 is correct about forwarding the webapp.
+```
+kubectl port-forward service/ccwebapp 80:80 
+kubectl port-forward service/ccserver 5000:5000
+```
+
+### Some utils commands
+```minikube dashboard``` open up a browser dashboard for kubernetes
+
+```kubectl delete deploy ccserver``` delete a Deployment service
+
+```kubectl delete service ccserver```delete a service related to deployment
+
+```kubectl get services ccserver``` get Info about the service 
