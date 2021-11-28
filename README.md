@@ -237,9 +237,9 @@ kubectl port-forward service/ccserver 5000:5000
 (Setup Video Link: https://www.youtube.com/watch?v=vpEDUmt_WKA) <br>
 3 EC2 Ubuntu machines with docker and kubernetes running on AWS, 1 Master Node and 2 Workers Node.<br>
 Public IP Addresses:
-- Master EC2 (Kubernetes master node): **3.91.0.127**
-- Worker-1 EC2 (Kubernetes worker node): **3.80.120.56**
-- Worker-2 EC2 (Kubernetes worker node): **23.22.137.230**
+- Master EC2 (Kubernetes master node): **MASTER EC2 IP ADDR**
+- Worker-1 EC2 (Kubernetes worker node): **WORKER1 EC2 IP ADDR**
+- Worker-2 EC2 (Kubernetes worker node): **WORKER2 EC2 IP ADDR**
 
 Add more nodes using:
 ```
@@ -255,6 +255,7 @@ ssh -i kube-servers.pem ubuntu@REPLACE_WITH_EC2_IP_ADDR
 Worker are already connected as a cluster and managed by Master, so you only need to deploy services/pod from Master.
 
 ### Deploy webapp from Master Node
+
 ```
 kubectl apply -f webapp-nginx-deployment.yaml
 ```
@@ -267,6 +268,24 @@ kubectl get pods
 ```
 kubectl get deployments
 ```
+
+- Command for expose the deployment into a service on port 80: <br>
+(This will create _n_ endpoints, one for each pod, endpoint can be called with their IP on the port 80, only inside the Master node ) 
+```
+kubectl expose deployment webapp-nginx --name=webapp-nginx --port=80
+ ```
+
+- Command for check pod/s endpoints after service created: <br>
+(Don't use _kubernetes cluster_ endpoints but _service-name_ endpoints)
+```
+kubectl get endpoints
+```
+
+- Command for forward requests on master node to the POD endpoints:
+```
+kubectl port-forward svc/webapp-nginx 8080:80 --address='0.0.0.0'
+```
+
 - Command for delete deployment service: 
 ```
 kubectl delete deploy webapp-nginx-deployment
@@ -294,17 +313,10 @@ with ```kubectl describe pod```.
 
 - Problem 2:
   - Kubernetes pull images only from trusted registry (HTTPS)
-- **Solution**(**Still not working**): Docker daemon needs to be configured to treat the local Docker registry as insecure.<br>
+- **Solution**: Docker daemon needs to be configured to treat the local Docker registry as insecure.<br>
 https://docs.docker.com/registry/insecure/ (Mi sono annoiato a scrivere in inglese, passo all'Italiano)
   - Per impostare il registro come non sicuro bisogna aggiungere la seguente riga nel file ```/etc/docker/daemon.json```:
     - ```"insecure-registries" : ["172.31.24.144:5001"]```
   - Riavviare il servizio docker con ```sudo systemctl restart docker``` (Attenzione, potrebbe essere necessario riavviare<br>
   il registro locale, soluzione del problema 1)
-  - Ho già applicato questa modifica nel nodo Master ma nonostante ciò il pull dell'immagine ancora non funziona dando <br>
-  sempre lo stesso errore di pull kubernetes fatto tramite HTTPS ma registro risponde solo ad HTTP, comunque il registro lo<br>
-  vede quindi è solo un problema di richiesta. 
-  - Il Tutorial indica di impostare il parametro **insecure-registries** in tutti i nodi, io l'ho fatto solo nel master<br>
-  ma non sono proprio sicuro che il problema sia questo, mi sembra più che sia Kubernetes che debba essere impostato<br>
-  per pullare con HTTP. 
-  - **ANCORA DA RISOLVERE**
-  
+  - Applicare la modifica in tutti i nodi del cluster
