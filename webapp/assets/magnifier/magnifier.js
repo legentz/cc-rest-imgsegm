@@ -1,7 +1,8 @@
 (function() {
 
-    var baseURL = "http://0.0.0.0:5000";
-    var endpointMat = baseURL + "/from_mat"
+    // var baseURL = "http://0.0.0.0:5000";
+    var baseURL = window.location.hostname + ":5000";
+    var endpointMat = baseURL + "/from_mat";
 
     // This values are required by the model since it cannot perform
     // predictions on images.shape != (1, 512, 512, 1)

@@ -7,6 +7,7 @@ from flask_cors import CORS, cross_origin
 from datetime import datetime
 from model.model import UNet
 from model.utils import Iterator, Images
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -43,7 +44,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # upload config
 PROTOCOL = "http"
 HOST = "0.0.0.0"
-PORT = "5000"
+PORT = "5001"
 BASE_URL = PROTOCOL + "://" + HOST + ":" + PORT
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
 UPLOAD_FOLDER = 'tmp'
@@ -58,6 +59,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def _check_urls(data = None):
 	if not data:
 		data = {}
+
+	# dynamic hostname selection (no hardcoding)
+	full_host = urlparse(request.base_url)
+	BASE_URL = PROTOCOL + "://" + full_host.hostname + ":" + PORT
 
 	for img_name, urls in data.items():
 		if EXPOSE_URLS_AS_ABSOLUTE:
