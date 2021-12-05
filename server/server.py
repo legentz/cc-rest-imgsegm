@@ -44,7 +44,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # upload config
 PROTOCOL = "http"
 HOST = "0.0.0.0"
-PORT = "5001"
+PORT = "5000"
 BASE_URL = PROTOCOL + "://" + HOST + ":" + PORT
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
 UPLOAD_FOLDER = 'tmp'
