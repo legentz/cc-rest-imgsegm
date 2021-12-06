@@ -246,6 +246,10 @@ Add more nodes using:
 kubeadm join 172.31.24.144:6443 --token a3s8f4.sbqunyb4g23l80x4 \
         --discovery-token-ca-cert-hash sha256:6c2defa7053b1ee445b42038e22bfbc2082b297651f8d07922586ea509e05213
 ```
+Check nodes status using:
+```
+kubectl get nodes
+```
 Each machine has the user '**ubuntu**'.You can access each machine using **SSH** with the following command:<br>
 ```
 ssh -i kube-servers.pem ubuntu@REPLACE_WITH_EC2_IP_ADDR
@@ -255,43 +259,85 @@ ssh -i kube-servers.pem ubuntu@REPLACE_WITH_EC2_IP_ADDR
 Worker are already connected as a cluster and managed by Master, so you only need to deploy services/pod from Master.
 
 ### Deploy webapp from Master Node
+**WARNING**: Before starting with deployments, you must open a local docker repository to permit kubernetes pull images from<br>
+local repository instead of public one. Check PROBLEM 1 and PROBLEM 2 section below.<br> _(All .yaml files can
+be found in in project root **/kubernetes/split-deploy**)_
+####1. Apply Webapp frontend pods deployments (1 replica) across nodes
+```
+kubectl apply -f webapp-frontend-deployment.yaml
+```
 
+####2. Apply Webapp backend pods deployments (3 replica) across nodes
 ```
-kubectl apply -f webapp-nginx-deployment.yaml
+kubectl apply -f webapp-frontend-deployment.yaml
 ```
-```webapp-nginx-deployment.yaml``` file can be found in project root **/kubernetes**.
 - Command for check all pod status:
 ```
 kubectl get pods
 ```
+_Add `-o wide` at the end of this command the check how pods are split across the nodes_
 - Command for check deployment status
 ```
 kubectl get deployments
 ```
 
-- Command for expose the deployment into a service on port 80: <br>
-(This will create _n_ endpoints, one for each pod, endpoint can be called with their IP on the port 80, only inside the Master node ) 
+####3. Expose the **frontend deployment** on port **80** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
+This step will create _n_ endpoints, one for each pod related to **frontend deployment** (actually **one**), these IPs are grouped<br>
+and managed by this Service under only one ClusterIP. On the Master node you can use `curl <ClusterIP>:80` to access webapp.
 ```
-kubectl expose deployment webapp-nginx --name=webapp-nginx --port=80
+kubectl apply -f webapp-frontend-service.yaml
+```
+- This is the same of doing:
+```
+kubectl expose deployment webapp-frontend --name=webapp-frontend --port=80
  ```
-
-- Command for check pod/s endpoints after service created: <br>
-(Don't use _kubernetes cluster_ endpoints but _service-name_ endpoints)
+- Command for check pods endpoints after service created:
 ```
 kubectl get endpoints
 ```
 
-- Command for forward requests on master node to the POD endpoints:
+####4. Expose the **backend deployment** on port **5000** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
+This step will create _n_ endpoints, one for each pod related to **backend deployment** (actually **three**), these IPs are grouped<br>
+and managed by this Service under only one ClusterIP.
 ```
-kubectl port-forward svc/webapp-nginx 8080:80 --address='0.0.0.0'
+kubectl apply -f webapp-backend-service.yaml
+```
+- This is the same of doing:
+```
+kubectl expose deployment webapp-backend --name=webapp-backend --port=5000
+ ```
+- Command for check pods endpoints after service created:
+```
+kubectl get endpoints
 ```
 
-- Command for delete deployment service: 
+####5. Forward outside master node requests to frontend/backend services
+- Command for forward master node webapp frontend requests on port 8080 to the frontend service on port 80:
 ```
-kubectl delete deploy webapp-nginx-deployment
+kubectl port-forward svc/webapp-frontend 8080:80 --address='0.0.0.0'
+```
+_Add `&` at the end of this command to run it on fake backgroung_
+
+- Command for forward master node webapp backend requests on port 5000 to the frontend service on port 5000:
+```
+kubectl port-forward svc/webapp-backend 5000:5000 --address='0.0.0.0'
+```
+_Add `&` at the end of this command to run it on fake backgroung_
+
+Webapp should now be running and responding from the outside on `http://<master_node_public_ip>:8080`
+### Cleanup
+- Command for delete deployments: 
+```
+kubectl delete deploy webapp-frontend
+kubectl delete deploy webapp-backend
+```
+- Command for delete services: 
+```
+kubectl delete svc webapp-frontend
+kubectl delete svc webapp-backend
 ```
 
-
+### Solutions to some Kubernetes problems
 - Problem 1:
   - Kubernetes tries to pull image defined in ```webapp-nginx-deployment.yaml``` from public docker registry.
 - **Solution**: We need to start a local registry and set kubernetes to pull image from local registry instead of public one.<br>
