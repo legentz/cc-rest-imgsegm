@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-server
+  name: webapp-frontend-backend
   labels:
     app: nginx
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: webapp-server
+      app: webapp-frontend-backend
   template:
     metadata:
       labels:
-        app: webapp-server
+        app: webapp-frontend-backend
     spec:
       containers:
       - name: webapp-nginx-alpine
-        image: 172.31.24.144:5001/webapp/nginx-alpine:v1.0
+        image: 172.31.24.144:5001/webapp/nginx-alpine:v1.1
         ports:
         - containerPort: 80
       - name: server-conda-debian

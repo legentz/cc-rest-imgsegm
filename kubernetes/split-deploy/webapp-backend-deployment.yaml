@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-backend
+spec:
+  selector:
+    matchLabels:
+      app: em-segmentation
+      tier: webapp-backend
+      track: stable
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: em-segmentation
+        tier: webapp-backend
+        track: stable
+    spec:
+      containers:
+      - name: server-conda-debian
+        image: 172.31.24.144:5001/server/conda-debian:v1.0
+        ports:
+        - containerPort: 5000
