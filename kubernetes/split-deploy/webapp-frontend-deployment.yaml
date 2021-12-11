@@ -18,6 +18,6 @@ spec:
     spec:
       containers:
       - name: webapp-nginx-alpine
-        image: 172.31.24.144:5001/webapp/nginx-alpine:v1.1
+        image: 172.31.27.155:5001/webapp/nginx-alpine:v1.0
         ports:
         - containerPort: 80
