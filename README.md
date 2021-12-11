@@ -362,7 +362,7 @@ with ```kubectl describe pod```.
 - **Solution**: Docker daemon needs to be configured to treat the local Docker registry as insecure.<br>
 https://docs.docker.com/registry/insecure/ (Mi sono annoiato a scrivere in inglese, passo all'Italiano)
   - Per impostare il registro come non sicuro bisogna aggiungere la seguente riga nel file ```/etc/docker/daemon.json```:
-    - ```"insecure-registries" : ["172.31.24.144:5001"]```
+    - ```"insecure-registries" : ["172.31.24.155:5001"]```
   - Riavviare il servizio docker con ```sudo systemctl restart docker``` (Attenzione, potrebbe essere necessario riavviare<br>
   il registro locale, soluzione del problema 1)
   - Applicare la modifica in tutti i nodi del cluster
