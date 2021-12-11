@@ -18,6 +18,6 @@ spec:
     spec:
       containers:
       - name: server-conda-debian
-        image: 172.31.24.144:5001/server/conda-debian:v1.0
+        image: 172.31.27.155:5001/server/conda-debian:v1.0
         ports:
         - containerPort: 5000

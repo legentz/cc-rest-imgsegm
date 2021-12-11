@@ -2,7 +2,7 @@ sudo nano /etc/docker/daemon.json
 
 {
     "exec-opts": ["native.cgroupdriver=systemd"],
-    "insecure-registries": ["172.31.24.155:5001"]
+    "insecure-registries": ["172.31.27.155:5001"]
 }
 
 sudo systemctl daemon-reload
