@@ -1,0 +1,14 @@
+sudo nano /etc/docker/daemon.json
+
+{
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "insecure-registries": ["172.31.24.155:5001"]
+}
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo systemctl restart kubelet
+
+
+sudo kubeadm join 172.31.27.155:6443 --token o2xami.vuszm9jn958b5511 \
+        --discovery-token-ca-cert-hash sha256:137f6e047ddd8ee91033b535fbba3c32c64a46d5276ba370198534e8ae1a653f
