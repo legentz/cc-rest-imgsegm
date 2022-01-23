@@ -8,7 +8,7 @@ spec:
       app: em-segmentation
       tier: webapp-backend
       track: stable
-  replicas: 10
+  replicas: 1
   template:
     metadata:
       labels:
