@@ -109,7 +109,7 @@ def _create_tmp_subfolder():
 	mydir = os.path.join(
 		os.getcwd(),
 		UPLOAD_FOLDER, 
-		datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+		datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
 	
 	try:
 		os.makedirs(mydir)								# this folder have timestamp
