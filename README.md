@@ -243,8 +243,8 @@ Public IP Addresses:
 
 Add more nodes using:
 ```
-kubeadm join 172.31.24.144:6443 --token a3s8f4.sbqunyb4g23l80x4 \
-        --discovery-token-ca-cert-hash sha256:6c2defa7053b1ee445b42038e22bfbc2082b297651f8d07922586ea509e05213
+sudo kubeadm join 172.31.27.155:6443 --token o2xami.vuszm9jn958b5511 \
+        --discovery-token-ca-cert-hash sha256:137f6e047ddd8ee91033b535fbba3c32c64a46d5276ba370198534e8ae1a653f
 ```
 Check nodes status using:
 ```
@@ -344,14 +344,14 @@ kubectl delete svc webapp-backend
 https://medium.com/htc-research-engineering-blog/setup-local-docker-repository-for-local-kubernetes-cluster-354f0730ed3a<br>
 https://docs.docker.com/registry/deploying/
   - Use the following command to run a docker container which starts a local registry service on port 5001
-    - ```docker run -d -e REGISTRY_HTTP_ADDR=0.0.0.0:5001 -p 5001:5001 --name registry registry:2```
+    - ```docker run -d --restart always -e REGISTRY_HTTP_ADDR=0.0.0.0:5001 -p 5001:5001 --name registry registry:2```
   - Use the following command to tag the local docker image using the private IP Address of the Master node. Kubernetes<br>
     will try to pull image from registry at that IP.
-    - ```docker tag webapp/nginx-alpine:v1.0 172.31.24.144:5001/webapp/nginx-alpine:v1.0```
+    - ```docker tag webapp/nginx-alpine:v1.0 172.31.27.155:5001/webapp/nginx-alpine:v1.0```
   - Use the following command to push the image
-    - ```docker push 172.31.24.144:5001/webapp/nginx-alpine:v1.0```
+    - ```docker push 172.31.27.155:5001/webapp/nginx-alpine:v1.0```
   - Use the following command to check image correctly pushed and can be pulled
-    - ```curl http://localhost:5001/v2/_catalog``` or ```curl http://172.31.24.144:5001/v2/_catalog```
+    - ```curl http://localhost:5001/v2/_catalog``` or ```curl http://172.31.27.155:5001/v2/_catalog```
     
 Now, if you try to Deploy the webapp, the image will not be pulled anyway because Kubernetes tries to pull using HTTPS<br>
 requests, but the local registry accept only HTTP requests. So after ```kubectl apply...``` you can check the error message<br>
@@ -362,7 +362,7 @@ with ```kubectl describe pod```.
 - **Solution**: Docker daemon needs to be configured to treat the local Docker registry as insecure.<br>
 https://docs.docker.com/registry/insecure/ (Mi sono annoiato a scrivere in inglese, passo all'Italiano)
   - Per impostare il registro come non sicuro bisogna aggiungere la seguente riga nel file ```/etc/docker/daemon.json```:
-    - ```"insecure-registries" : ["172.31.24.155:5001"]```
+    - ```"insecure-registries" : ["172.31.27.155:5001"]```
   - Riavviare il servizio docker con ```sudo systemctl restart docker``` (Attenzione, potrebbe essere necessario riavviare<br>
   il registro locale, soluzione del problema 1)
   - Applicare la modifica in tutti i nodi del cluster
