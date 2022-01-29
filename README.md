@@ -148,7 +148,7 @@ The service comes from another project [NN4DS](https://github.com/legentz/nn4ds-
 
 ## Docker
 
-Use the following commands to build and run docker containers for server and webapp.<br>
+Use the following commands to build images and run docker containers for server and webapp.<br>
 **Make sure to be into the docker folder (...cc-rest-imgsegm/docker) when running build command.**<br>
 
 **You can run build command from project's root path, but you must add ```docker/``` to dockerfiles path<br> and replace build’s context path with```.``` instead of ```../```**
@@ -234,8 +234,7 @@ kubectl port-forward service/ccserver 5000:5000
 
 
 ## Kubernetes AWS
-(Setup Video Link: https://www.youtube.com/watch?v=vpEDUmt_WKA) <br>
-3 EC2 Ubuntu machines with docker and kubernetes running on AWS, 1 Master Node and 2 Workers Node.<br>
+5 EC2 Ubuntu machines with docker and kubernetes running on AWS, 1 Master Node and 4 Workers Node.<br>
 Public IP Addresses:
 - Master EC2 (Kubernetes master node): **MASTER EC2 IP ADDR**
 - Worker-1 EC2 (Kubernetes worker node): **WORKER1 EC2 IP ADDR**
@@ -243,8 +242,8 @@ Public IP Addresses:
 
 Add more nodes using:
 ```
-sudo kubeadm join 172.31.27.155:6443 --token o2xami.vuszm9jn958b5511 \
-        --discovery-token-ca-cert-hash sha256:137f6e047ddd8ee91033b535fbba3c32c64a46d5276ba370198534e8ae1a653f
+sudo kubeadm join **MASTER_NODE_EC2_IP_ADDR** --token **KUBE_INIT_TOKEN** \
+        --discovery-token-ca-cert-hash **KUBE_INIT_HASH**
 ```
 Check nodes status using:
 ```
@@ -256,18 +255,17 @@ ssh -i kube-servers.pem ubuntu@REPLACE_WITH_EC2_IP_ADDR
 ```
 ```kube-servers.pem``` is the public key generated inside the AWS account. (in project root /aws)
 
-Worker are already connected as a cluster and managed by Master, so you only need to deploy services/pod from Master.
 
 ### Deploy webapp from Master Node
 **WARNING**: Before starting with deployments, you must open a local docker repository to permit kubernetes pull images from<br>
 local repository instead of public one. Check PROBLEM 1 and PROBLEM 2 section below.<br> _(All .yaml files can
 be found in in project root **/kubernetes/split-deploy**)_
-####1. Apply Webapp frontend pods deployments (1 replica) across nodes
+#### 1. Apply Webapp frontend pods deployments across nodes
 ```
 kubectl apply -f webapp-frontend-deployment.yaml
 ```
 
-####2. Apply Webapp backend pods deployments (3 replica) across nodes
+#### 2. Apply Webapp backend pods deployments across nodes
 ```
 kubectl apply -f webapp-frontend-deployment.yaml
 ```
@@ -281,8 +279,8 @@ _Add `-o wide` at the end of this command the check how pods are split across th
 kubectl get deployments
 ```
 
-####3. Expose the **frontend deployment** on port **80** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
-This step will create _n_ endpoints, one for each pod related to **frontend deployment** (actually **one**), these IPs are grouped<br>
+#### 3. Expose the **frontend deployment** on port **80** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
+This step will create _n_ endpoints, one for each pod related to **frontend deployment** , these IPs are grouped<br>
 and managed by this Service under only one ClusterIP. On the Master node you can use `curl <ClusterIP>:80` to access webapp.
 ```
 kubectl apply -f webapp-frontend-service.yaml
@@ -296,8 +294,8 @@ kubectl expose deployment webapp-frontend --name=webapp-frontend --port=80
 kubectl get endpoints
 ```
 
-####4. Expose the **backend deployment** on port **5000** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
-This step will create _n_ endpoints, one for each pod related to **backend deployment** (actually **three**), these IPs are grouped<br>
+#### 4. Expose the **backend deployment** on port **5000** outside the cluster using a service. (Default service type: **ClusterIP**)<br>
+This step will create _n_ endpoints, one for each pod related to **backend deployment**, these IPs are grouped<br>
 and managed by this Service under only one ClusterIP.
 ```
 kubectl apply -f webapp-backend-service.yaml
@@ -311,7 +309,7 @@ kubectl expose deployment webapp-backend --name=webapp-backend --port=5000
 kubectl get endpoints
 ```
 
-####5. Forward outside master node requests to frontend/backend services
+#### 5. Forward outside master node requests to frontend/backend services
 - Command for forward master node webapp frontend requests on port 8080 to the frontend service on port 80:
 ```
 kubectl port-forward svc/webapp-frontend 8080:80 --address='0.0.0.0'
@@ -341,8 +339,6 @@ kubectl delete svc webapp-backend
 - Problem 1:
   - Kubernetes tries to pull image defined in ```webapp-nginx-deployment.yaml``` from public docker registry.
 - **Solution**: We need to start a local registry and set kubernetes to pull image from local registry instead of public one.<br>
-https://medium.com/htc-research-engineering-blog/setup-local-docker-repository-for-local-kubernetes-cluster-354f0730ed3a<br>
-https://docs.docker.com/registry/deploying/
   - Use the following command to run a docker container which starts a local registry service on port 5001
     - ```docker run -d --restart always -e REGISTRY_HTTP_ADDR=0.0.0.0:5001 -p 5001:5001 --name registry registry:2```
   - Use the following command to tag the local docker image using the private IP Address of the Master node. Kubernetes<br>
@@ -360,9 +356,8 @@ with ```kubectl describe pod```.
 - Problem 2:
   - Kubernetes pull images only from trusted registry (HTTPS)
 - **Solution**: Docker daemon needs to be configured to treat the local Docker registry as insecure.<br>
-https://docs.docker.com/registry/insecure/ (Mi sono annoiato a scrivere in inglese, passo all'Italiano)
-  - Per impostare il registro come non sicuro bisogna aggiungere la seguente riga nel file ```/etc/docker/daemon.json```:
+https://docs.docker.com/registry/insecure/
+  - To set registry as insecure, add the following line to this file ```/etc/docker/daemon.json```:
     - ```"insecure-registries" : ["172.31.27.155:5001"]```
-  - Riavviare il servizio docker con ```sudo systemctl restart docker``` (Attenzione, potrebbe essere necessario riavviare<br>
-  il registro locale, soluzione del problema 1)
-  - Applicare la modifica in tutti i nodi del cluster
+  - Restart docker service with ```sudo systemctl restart docker```
+  - Apply these changes to all cluster nodes
